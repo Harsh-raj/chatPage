@@ -1,0 +1,7 @@
+fastapi
+uvicorn
+pydantic
+numpy
+qdrant-client
+sentence-transformers
+rank_bm25
