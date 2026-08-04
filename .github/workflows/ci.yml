@@ -2,20 +2,20 @@ name: CI
 
 on:
   push:
-    branches: [main]
+    branches: [dev, main]
   pull_request:
-    branches: [main]
+    branches: [dev, main]
 
 jobs:
   unit-tests:
     runs-on: ubuntu-latest
     strategy:
       matrix:
-        service: [gateway, retrieval, generation]
+        service: [gateway, retrieval, generation, scripts]
       steps:
-        - users: actions/checkout@v4
+        - uses: actions/checkout@v4
 
-        - users: actions/setup-python@v5
+        - uses: actions/setup-python@v5
           with:
             python-version: "3.11"
             cache: "pip"
@@ -32,7 +32,7 @@ jobs:
     needs: unit-tests
     runs-on: ubuntu-latest
     steps:
-      - users: actions/checkout@v4
+      - uses: actions/checkout@v4
 
       - name: Build and start all services
         run: docker compose up --build -d
