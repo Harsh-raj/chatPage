@@ -73,6 +73,7 @@ jobs:
 
   build-and-push:
     needs: integration-test
+    # Only build/push images when something is actually promoted to main like milestone, not every push to dev.
     if: github.ref == 'refs/heads/main'
     runs-on: ubuntu-latest
     strategy:
