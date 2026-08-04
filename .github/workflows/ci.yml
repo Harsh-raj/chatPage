@@ -97,6 +97,6 @@ jobs:
         with:
           context: ./${{ matrix.component }}
           push: true
-          tags: ghcr.io/${{ github.repository }}/${{ matrix.component }}:${{ github.sha }}
+          tags: ghcr.io/${{ steps.repo.outputs.name }}/${{ matrix.component }}:${{ github.sha }}
           cache-from: type=gha
           cache-to: type=gha,mode=max
