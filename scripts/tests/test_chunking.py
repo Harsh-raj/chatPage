@@ -1,5 +1,4 @@
 from app.chunking import chunk_text
-import sys
 
 
 def test_short_text_returns_single_chunk():
