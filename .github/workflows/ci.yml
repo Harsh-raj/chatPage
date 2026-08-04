@@ -1,9 +1,9 @@
 name: CI
 
-on:
-  push:
-    branches: [dev, main]
+"on":
   pull_request:
+    branches: [dev, main]
+  push:
     branches: [dev, main]
 
 jobs:
@@ -11,22 +11,22 @@ jobs:
     runs-on: ubuntu-latest
     strategy:
       matrix:
-        service: [gateway, retrieval, generation, scripts]
-      steps:
-        - uses: actions/checkout@v4
+        component: [gateway, retrieval, generation, scripts]
+    steps:
+      - uses: actions/checkout@v4
 
-        - uses: actions/setup-python@v5
-          with:
-            python-version: "3.11"
-            cache: "pip"
+      - uses: actions/setup-python@v5
+        with:
+          python-version: "3.11"
+          cache: "pip"
 
-        - name: Install dependencies
-          working-directory: ${{ matrix.service }}
-          run: pip install -r requirements.txt pytest httpx
+      - name: Install dependencies
+        working-directory: ${{ matrix.component }}
+        run: pip install -r requirements.txt pytest httpx
 
-        - name: Run unit tests
-          working-directory: ${{ matrix.service }}
-          run: pytest tests/ -v
+      - name: Run unit tests
+        working-directory: ${{ matrix.component }}
+        run: pytest tests/ -v
 
   integration-test:
     needs: unit-tests
@@ -34,7 +34,7 @@ jobs:
     steps:
       - uses: actions/checkout@v4
 
-      - name: Build and start all services
+      - name: Build and start all services (stub mode, no real models, keeps CI fast)
         run: docker compose up --build -d
 
       - name: Wait for services to be healthy
@@ -55,7 +55,10 @@ jobs:
 
       - uses: actions/setup-python@v5
         with:
-          ptyhon-version: "3.11"
+          python-version: "3.11"
+
+      - name: Install test dependencies
+        run: pip install pytest httpx
 
       - name: Run integration tests against live containers
         run: pytest tests/integration/ -v
@@ -70,13 +73,13 @@ jobs:
 
   build-and-push:
     needs: integration-test
-    if: github.ref == 'ref/heads/main'
+    if: github.ref == 'refs/heads/main'
     runs-on: ubuntu-latest
     strategy:
       matrix:
-        service: [gateway, retrieval, generation]
+        component: [gateway, retrieval, generation, frontend]
     steps:
-      - uses: actions/checout@v4
+      - uses: actions/checkout@v4
 
       - uses: docker/setup-buildx-action@v3
 
@@ -88,8 +91,8 @@ jobs:
 
       - uses: docker/build-push-action@v6
         with:
-          context: ./${{ matrix.service }}
+          context: ./${{ matrix.component }}
           push: true
-          tags: ghcr.io/${{ github.repository }}/${{ matrix.service }}:${{ github.sha }}
+          tags: ghcr.io/${{ github.repository }}/${{ matrix.component }}:${{ github.sha }}
           cache-from: type=gha
           cache-to: type=gha,mode=max
