@@ -28,8 +28,8 @@ services:
     environment:
       USE_REAL_EMBEDDER: "${USE_REAL_EMBEDDER:-0}"
       USE_REAL_STORE: "${USE_REAL_STORE:-0}"
-      USE_RERANKER: "{USE_RERANKER:-0}"
-      RERANK_THRESHOLD: "{RERANK_THRESHOLD:-0.3}"
+      USE_RERANKER: "${USE_RERANKER:-0}"
+      RERANK_THRESHOLD: "${RERANK_THRESHOLD:-0.3}"
       QDRANT_URL: "http://qdrant:6333"
     depends_on:
       - qdrant
