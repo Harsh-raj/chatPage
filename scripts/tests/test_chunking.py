@@ -1,6 +1,5 @@
+from app.chunking import chunk_text
 import sys
-sys.path.insert(0, "..")
-from chunking import chunk_text
 
 
 def test_short_text_returns_single_chunk():
