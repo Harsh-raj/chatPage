@@ -26,10 +26,10 @@ services:
     ports:
       - "8001:8000"
     environment:
-      USE_REAL_EMBEDDER: "1"
-      USE_REAL_STORE: "1"
-      USE_RERANKER: "1"
-      RERANK_THRESHOLD: "0.3"
+      USE_REAL_EMBEDDER: "${USE_REAL_EMBEDDER:-0}"
+      USE_REAL_STORE: "${USE_REAL_STORE:-0}"
+      USE_RERANKER: "{USE_RERANKER:-0}"
+      RERANK_THRESHOLD: "{RERANK_THRESHOLD:-0.3}"
       QDRANT_URL: "http://qdrant:6333"
     depends_on:
       - qdrant
@@ -42,7 +42,7 @@ services:
     ports:
       - "8002:8000"
     environment:
-      USE_REAL_LLM: "1"
+      USE_REAL_LLM: "${USE_REAL_LLM:-0}"
     depends_on:
       - ollama
     restart: unless-stopped
