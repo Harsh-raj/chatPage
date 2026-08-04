@@ -1,0 +1,57 @@
+[
+  {
+    "id": "ml_specific_1",
+    "question": "What is the perceptron?",
+    "expected_source_contains": "pattern_recognition_primer",
+    "expected_keywords": ["perceptron", "linear"]
+  },
+  {
+    "id": "ml_specific_2",
+    "question": "What is overfitting?",
+    "expected_source_contains": "pattern_recognition_primer",
+    "expected_keywords": ["overfitting"]
+  },
+  {
+    "id": "ml_structural",
+    "question": "List the chapters in the pattern recognition document.",
+    "expected_source_contains": "pattern_recognition_primer",
+    "expected_keywords": []
+  },
+  {
+    "id": "mechanics_specific_1",
+    "question": "What is Newton's second law?",
+    "expected_source_contains": "classical_mechanics_primer",
+    "expected_keywords": ["force", "mass", "acceleration"]
+  },
+  {
+    "id": "mechanics_specific_2",
+    "question": "What is conservation of momentum?",
+    "expected_source_contains": "classical_mechanics_primer",
+    "expected_keywords": ["momentum"]
+  },
+  {
+    "id": "mechanics_structural",
+    "question": "List the chapters in the classical mechanics document.",
+    "expected_source_contains": "classical_mechanics_primer",
+    "expected_keywords": []
+  },
+  {
+    "id": "cross_doc_disambiguation_1",
+    "question": "What is torque?",
+    "expected_source_contains": "classical_mechanics_primer",
+    "expected_keywords": ["torque", "rotation"]
+  },
+  {
+    "id": "cross_doc_disambiguation_2",
+    "question": "What is regularization used for?",
+    "expected_source_contains": "pattern_recognition_primer",
+    "expected_keywords": ["overfitting"]
+  },
+  {
+    "id": "out_of_scope",
+    "question": "What is the boiling point of water?",
+    "expected_source_contains": null,
+    "expected_keywords": [],
+    "expect_low_confidence": true
+  }
+]
