@@ -4,3 +4,4 @@ pydantic
 numpy
 qdrant-client
 sentence-transformers
+langfuse
