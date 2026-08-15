@@ -46,7 +46,8 @@ class BM25KeywordIndex(KeywordIndex):
         self._bm25: BM25Okapi | None = None
 
     def _rebuild(self) -> None:
-        self._bm25 = BM25Okapi(self._tokenized_corpus) if self._tokenized_corpus else None
+        self._bm25 = BM25Okapi(
+            self._tokenized_corpus) if self._tokenized_corpus else None
 
     def add(self, ids: list[str], texts: list[str], payloads: list[dict] | None = None) -> None:
         self._ids.extend(ids)
@@ -65,13 +66,15 @@ class BM25KeywordIndex(KeywordIndex):
         top_k = min(top_k, len(self._ids))
         top_idx = sorted(range(len(scores)), key=lambda i: -scores[i])[:top_k]
         return [
-            {"id": self._ids[i], "score": float(scores[i]), **self._payloads[i]}
+            {"id": self._ids[i], "score": float(
+                scores[i]), **self._payloads[i]}
             for i in top_idx
         ]
 
     def delete(self, ids: list[str]) -> int:
         ids_to_remove = set(ids)
-        keep_idx = [i for i, doc_id in enumerate(self._ids) if doc_id not in ids_to_remove]
+        keep_idx = [i for i, doc_id in enumerate(
+            self._ids) if doc_id not in ids_to_remove]
         removed = len(self._ids) - len(keep_idx)
 
         self._ids = [self._ids[i] for i in keep_idx]
