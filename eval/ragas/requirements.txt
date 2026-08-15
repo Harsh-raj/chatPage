@@ -1,0 +1,11 @@
+# Pin ragas explicitly -- its API has shifted meaningfully between minor
+# versions (classic Faithfulness/AnswerRelevancy/etc. classes moved to
+# ragas.metrics.collections, and LangchainLLMWrapper is now deprecated in
+# favor of llm_factory/embedding_factory). run_ragas_eval.py is written
+# against this version's API.
+ragas==0.4.3
+anthropic
+openai
+langfuse
+sentence-transformers
+httpx

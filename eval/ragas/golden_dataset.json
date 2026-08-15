@@ -1,0 +1,44 @@
+[
+  {
+    "id": "gq-1",
+    "question": "In what year was the Eiffel Tower completed?",
+    "ground_truth": "The Eiffel Tower was completed in 1889."
+  },
+  {
+    "id": "gq-2",
+    "question": "Who designed the Statue of Liberty?",
+    "ground_truth": "The Statue of Liberty was designed by the French sculptor Frederic Auguste Bartholdi, with the iron framework built by Gustave Eiffel."
+  },
+  {
+    "id": "gq-3",
+    "question": "How tall is Mount Everest above sea level?",
+    "ground_truth": "Mount Everest is 8,849 meters above sea level."
+  },
+  {
+    "id": "gq-4",
+    "question": "Roughly what percentage of the world's known species live in the Amazon rainforest?",
+    "ground_truth": "The Amazon rainforest is home to an estimated 10% of the world's known species."
+  },
+  {
+    "id": "gq-5",
+    "question": "Who created the Python programming language, and when was it first released?",
+    "ground_truth": "Python was created by Guido van Rossum and first released in 1991."
+  },
+  {
+    "id": "gq-6",
+    "question": "During which dynasty were the most famous, best-preserved sections of the Great Wall of China built?",
+    "ground_truth": "The most famous, best-preserved sections of the Great Wall were built during the Ming dynasty, between 1368 and 1644."
+  },
+  {
+    "id": "gq-7",
+    "question": "Who first successfully climbed to the summit of Mount Everest?",
+    "ground_truth": "Mount Everest was first summited in 1953 by Edmund Hillary and Tenzing Norgay."
+  },
+  {
+    "id": "gq-8",
+    "question": "What is the capital of Australia?",
+    "ground_truth": "This information is not available in the provided documents.",
+    "expect_low_confidence": true,
+    "notes": "Out-of-scope question -- none of the seed documents mention Australia. A faithful answer should say it doesn't know rather than guessing or fabricating a fact from unrelated context."
+  }
+]
