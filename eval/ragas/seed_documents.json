@@ -1,0 +1,32 @@
+[
+  {
+    "id": "eiffel-1",
+    "text": "The Eiffel Tower is a wrought-iron lattice tower on the Champ de Mars in Paris, France. It was designed by Gustave Eiffel's engineering company and completed in 1889 as the entrance arch for the 1889 World's Fair. It stands 330 meters tall and was the tallest man-made structure in the world for 41 years, until the Chrysler Building in New York was completed in 1930.",
+    "metadata": {"source": "eiffel_tower.txt"}
+  },
+  {
+    "id": "liberty-1",
+    "text": "The Statue of Liberty is a copper statue on Liberty Island in New York Harbor. It was designed by French sculptor Frederic Auguste Bartholdi, with the iron framework built by Gustave Eiffel. It was a gift from the people of France to the United States and was dedicated on October 28, 1886.",
+    "metadata": {"source": "statue_of_liberty.txt"}
+  },
+  {
+    "id": "great-wall-1",
+    "text": "The Great Wall of China is a series of fortifications built across the historical northern borders of China to protect against invasions. Construction began as early as the 7th century BC, but the most famous, best-preserved sections were built during the Ming dynasty, between 1368 and 1644.",
+    "metadata": {"source": "great_wall.txt"}
+  },
+  {
+    "id": "amazon-1",
+    "text": "The Amazon rainforest is the largest tropical rainforest in the world, spanning nine countries in South America, with roughly 60% of it located in Brazil. It is home to an estimated 10% of the world's known species and plays a major role in regulating global carbon levels and rainfall patterns.",
+    "metadata": {"source": "amazon_rainforest.txt"}
+  },
+  {
+    "id": "everest-1",
+    "text": "Mount Everest is Earth's highest mountain above sea level, located in the Mahalangur Himal sub-range of the Himalayas. Its peak is 8,849 meters above sea level, and it straddles the border between Nepal and the Tibet Autonomous Region of China. It was first summited in 1953 by Edmund Hillary and Tenzing Norgay.",
+    "metadata": {"source": "mount_everest.txt"}
+  },
+  {
+    "id": "python-1",
+    "text": "Python is a high-level, general-purpose programming language created by Guido van Rossum and first released in 1991. It emphasizes code readability through significant indentation and supports multiple programming paradigms, including structured, object-oriented, and functional programming.",
+    "metadata": {"source": "python_language.txt"}
+  }
+]
