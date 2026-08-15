@@ -16,4 +16,4 @@ class QueryResponse(BaseModel):
     answer: str
     sources: list[SourceChunk]
     trace_id: str | None = None
-    trace_id: str | None = None
+    trace_url: str | None = None
