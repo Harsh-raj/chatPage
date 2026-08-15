@@ -1,0 +1,51 @@
+[tool.ruff]
+target-version = "py311"
+line-length = 120
+
+[tool.ruff.lint]
+# Deliberately explicit rather than relying on ruff's default selection,
+# which has changed across versions and would otherwise mean "what ruff.
+# check does" silently drifts depending on which version happens to be
+# installed. Add rule groups here deliberately, not by accident.
+select = [
+  "E",   # pycodestyle errors
+  "F",   # pyflakes (undefined names, unused imports, etc.)
+  "I",   # isort (import sorting)
+  "B",   # flake8-bugbear (common real bug patterns)
+  "SIM", # flake8-simplify (readability suggestions)
+]
+# BLE001 (flake8-blind-except) is deliberately NOT selected. Several
+# services -- most visibly scripts/app/ingest_pdf.py's per-page/table/image
+# extraction, and gateway/app/main.py's get_trace_url() call -- catch a bare
+# `Exception` on purpose: the whole design is best-effort extraction/tracing
+# that logs a warning and keeps going rather than letting one bad page,
+# table, image, or unreachable observability backend take down the entire
+# operation. That's a deliberate architectural choice (see docs/adr/), not
+# an oversight BLE001 would be right to flag.
+
+[tool.ruff.lint.flake8-bugbear]
+# B008 ("no function calls in default arguments") is right in general (it
+# catches real mutable-default-argument bugs) but is a false positive for
+# FastAPI's dependency-injection style, which *requires* calling File(...),
+# Form(...), Depends(...), etc. as parameter defaults -- that's idiomatic
+# FastAPI, not a bug. Tell bugbear these specific calls are safe rather than
+# disabling B008 (and losing its real bug-catching value) project-wide.
+extend-immutable-calls = [
+  "fastapi.Depends",
+  "fastapi.File",
+  "fastapi.Form",
+  "fastapi.Query",
+  "fastapi.Body",
+  "fastapi.Header",
+  "fastapi.Cookie",
+  "fastapi.Path",
+]
+
+[tool.mypy]
+# No explicit python_version pin: numpy's own bundled type stubs (not this
+# project's code) use syntax that requires whatever mypy's actual running
+# interpreter supports, and pinning this to match the Dockerfiles' 3.11
+# runtime conflicts with that. Defaulting to the running interpreter's
+# version sidesteps it without affecting how this project's own code (which
+# uses no 3.12-only syntax) gets checked.
+ignore_missing_imports = true

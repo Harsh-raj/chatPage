@@ -1,0 +1,71 @@
+name: RAGAS evaluation
+
+# Deliberately workflow_dispatch only -- unlike ci.yml, this calls a paid
+# external LLM API per run and should never fire automatically or push/PR.
+
+on:
+  workflow_dispatch:
+    inputs:
+      judge_models:
+        description: "Anthropic model id to use as the RAGAS judge"
+        required: turn
+        default: "claude-sonnet-4-6"
+
+jobs:
+  ragas-eval:
+    runs-on: ubuntu-latest
+    env:
+      USE_REAL_EMBEDDER: "1"
+      USE_REAL_STORE: "1"
+      USE_REAL_LLM: "1"
+      ANTHROPIC_API_KEY: ${{ secrets.ANTROPIC_API_KEY }}
+      RAGAS_JUDGE_MODEL: ${{ inputs.judge_model }}
+      LANGFUSE_PUBLIC_KEY: ${{ secrets.LANGFUSE_PUBLIC_KEY }}
+      LANGFUSE_SECRET_KEY: ${{ secrets.LANGFUSE_SECRET_KEY }}
+      LANGFUSE_HOST: ${{ vars.LANGFUSE_HOST }}
+    steps:
+      - uses: actions/checkout@v4
+
+      - name: Bring up full stack with real components
+        run: docker compose up --build -d
+
+      - name: Wait for services to be healthy
+        run: |
+          for i in {1..60}; do
+            if curl -sf http://localhost:8000/health && \
+               curl -sf http://localhost:8001/health && \
+               curl -sf http://localhost:8002/health; then
+              echo "All services healthy"
+              exit 0
+            fi
+            echo "Waiting for services..."
+            sleep 3
+          done
+          echo "Services did not become healthy in time"
+          docker compose logs
+          exit 1
+
+      - uses: actions/setup-python@v5
+        with:
+          python-version: "3.11"
+
+      - name: Install eval dependencies
+        run: pip install -r eval/ragas/requirements.txt
+
+      - name: Run RAGAS evaluation
+        run: python eval/ragas/run_ragas_eval.py
+
+      - name: Upload results
+        if: always()
+        uses: actions/upload-artifact@v4
+        with:
+          name: ragas-results
+          path: eval/ragas/results/
+
+      - name: Dump logs on failure
+        if: failure()
+        run: docker compose logs
+
+      - name: Tear down
+        if: always()
+        run: docker compose down -v
