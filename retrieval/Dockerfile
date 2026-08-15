@@ -6,7 +6,7 @@ COPY requirements.txt .
 # For a smaller/faster image, install the CPU-only wheel first, e.g.:
 #   RUN pip install torch --index-url https://download.pytorch.org/whl/cpu
 # then install the rest of requirements.txt, which will skip the GPU torch build.
-RUN pip install --no-cache-dir -r requirements.txt
+RUN --mount=type=cache,target=/root/.cache/pip pip install -r requirements.txt
 
 COPY app ./app
 EXPOSE 8000

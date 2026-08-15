@@ -21,7 +21,8 @@ class DeterministicHashEmbedder(Embedder):
         for i, text in enumerate(texts):
             digest = hashlib.sha256(text.encode("utf-8")).digest()
             repeated = (digest * ((self.dim // len(digest)) + 1))[: self.dim]
-            vectors[i] = np.frombuffer(bytes(repeated), dtype=np.uint8).astype(float)
+            vectors[i] = np.frombuffer(
+                bytes(repeated), dtype=np.uint8).astype(float)
         norms = np.linalg.norm(vectors, axis=1, keepdims=True)
         norms[norms == 0] = 1e-10
         return vectors / norms
