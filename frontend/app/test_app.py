@@ -21,10 +21,10 @@ Two important environment knobs used everywhere below:
   Streamlit's own test harness relies on time.sleep internally, and
   patching it globally breaks AppTest's own machinery, not just main.py's.
 """
+
 import json
-import os
 from pathlib import Path
-from unittest.mock import patch, MagicMock
+from unittest.mock import MagicMock, patch
 
 import pytest
 import requests
@@ -48,6 +48,7 @@ def _healthy_response():
 
 # --- Sidebar: the upload feature itself ---
 
+
 def test_sidebar_shows_upload_controls():
     with patch("requests.get", return_value=_healthy_response()):
         at = AppTest.from_file(MAIN_PATH).run(timeout=15)
@@ -70,6 +71,7 @@ def test_ingest_button_disabled_with_no_file_selected():
 
 
 # --- Readiness gate ---
+
 
 def test_chat_input_hidden_while_backend_not_ready():
     with patch("requests.get", side_effect=requests.exceptions.ConnectionError("refused")):
@@ -103,6 +105,7 @@ def test_sidebar_still_renders_while_backend_not_ready():
 
 # --- Chat round trip ---
 
+
 def test_full_chat_round_trip_renders_answer_and_sources():
     query_response_lines = [
         json.dumps({"type": "sources", "sources": [{"id": "doc1", "text": "Paris is the capital.", "score": 0.92}]}),
@@ -116,8 +119,10 @@ def test_full_chat_round_trip_renders_answer_and_sources():
     mock_stream_response.raise_for_status.return_value = None
     mock_stream_response.iter_lines.return_value = query_response_lines
 
-    with patch("requests.get", return_value=_healthy_response()), \
-         patch("requests.post", return_value=mock_stream_response):
+    with (
+        patch("requests.get", return_value=_healthy_response()),
+        patch("requests.post", return_value=mock_stream_response),
+    ):
         at = AppTest.from_file(MAIN_PATH).run(timeout=15)
         at.chat_input[0].set_value("What is the capital of France?").run(timeout=15)
 

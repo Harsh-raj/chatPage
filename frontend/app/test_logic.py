@@ -9,25 +9,30 @@ they're built entirely out of st.* rendering calls (st.columns, st.popover,
 st.status, ...) -- their actual behavior is what renders, which is exactly
 what test_app.py's AppTest-based tests check instead.
 """
+
+from unittest.mock import MagicMock, patch
+
 import pytest
 import requests
-from unittest.mock import patch, MagicMock
 
 from app.logic import _describe_ingest_event, check_backend_ready, stream_query
 
-
 # --- _describe_ingest_event: every event type, plus the unknown-type case ---
 
-@pytest.mark.parametrize("event,expected_substring", [
-    ({"type": "start", "num_pages": 5}, "Found 5 page(s)"),
-    ({"type": "page_extracted", "page": 2, "num_pages": 5, "documents_so_far": 7}, "Extracted page 2/5"),
-    ({"type": "summarizing_page", "page": 3, "num_pages": 5}, "Summarizing page 3/5"),
-    ({"type": "summarizing_document"}, "whole-document summary"),
-    ({"type": "extraction_done", "counts": {"chunk": 3, "table": 1}}, "3 chunk, 1 table"),
-    ({"type": "index_progress", "indexed": 10, "total": 20}, "Indexed 10/20"),
-    ({"type": "done", "num_documents": 12, "filename": "report.pdf"}, "12 chunk(s) from report.pdf"),
-    ({"type": "error", "message": "boom"}, "Error: boom"),
-])
+
+@pytest.mark.parametrize(
+    "event,expected_substring",
+    [
+        ({"type": "start", "num_pages": 5}, "Found 5 page(s)"),
+        ({"type": "page_extracted", "page": 2, "num_pages": 5, "documents_so_far": 7}, "Extracted page 2/5"),
+        ({"type": "summarizing_page", "page": 3, "num_pages": 5}, "Summarizing page 3/5"),
+        ({"type": "summarizing_document"}, "whole-document summary"),
+        ({"type": "extraction_done", "counts": {"chunk": 3, "table": 1}}, "3 chunk, 1 table"),
+        ({"type": "index_progress", "indexed": 10, "total": 20}, "Indexed 10/20"),
+        ({"type": "done", "num_documents": 12, "filename": "report.pdf"}, "12 chunk(s) from report.pdf"),
+        ({"type": "error", "message": "boom"}, "Error: boom"),
+    ],
+)
 def test_describe_ingest_event_known_types(event, expected_substring):
     result = _describe_ingest_event(event)
     assert result is not None
@@ -40,9 +45,13 @@ def test_describe_ingest_event_extraction_done_with_nothing_extracted():
 
 
 def test_describe_ingest_event_index_progress_nothing_to_index():
-    result = _describe_ingest_event({
-        "type": "index_progress", "total": 0, "message": "Nothing to index.",
-    })
+    result = _describe_ingest_event(
+        {
+            "type": "index_progress",
+            "total": 0,
+            "message": "Nothing to index.",
+        }
+    )
     assert result == "Nothing to index."
 
 
@@ -51,6 +60,7 @@ def test_describe_ingest_event_unknown_type_returns_none():
 
 
 # --- check_backend_ready ---
+
 
 def test_check_backend_ready_returns_health_json_on_success():
     with patch("app.logic.requests.get") as mock_get:
@@ -79,6 +89,7 @@ def test_check_backend_ready_returns_none_on_http_error():
 
 # --- stream_query ---
 
+
 def _fake_streaming_response(lines):
     """A MagicMock standing in for `with requests.post(...) as response:` --
     supports the context-manager protocol and .iter_lines()."""
@@ -92,6 +103,7 @@ def _fake_streaming_response(lines):
 
 def test_stream_query_yields_tokens_and_collects_sources():
     import json
+
     lines = [
         json.dumps({"type": "sources", "sources": [{"id": "doc1", "text": "hi", "score": 0.9}]}),
         json.dumps({"type": "token", "text": "Hello "}),

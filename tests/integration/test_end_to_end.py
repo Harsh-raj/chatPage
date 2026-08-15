@@ -23,8 +23,7 @@ def seed_retrieval_index():
     """Indexes one known document before the tests run, so search has something to find."""
     response = httpx.post(
         f"{RETRIEVAL_URL}/index",
-        json={"documents": [
-            {"id": "doc1", "text": "The Eiffel Tower is located in Paris, France.", "metadata": {}}]},
+        json={"documents": [{"id": "doc1", "text": "The Eiffel Tower is located in Paris, France.", "metadata": {}}]},
         headers=AUTH_HEADERS,
         timeout=10.0,
     )

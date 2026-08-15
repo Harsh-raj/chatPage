@@ -54,17 +54,13 @@ def query(payload: QueryRequest, http_request: Request) -> QueryResponse:
         trace_context={"trace_id": trace_id},
         input={"query": payload.query, "top_k": payload.top_k},
     ) as root_span:
-        results = client.search(
-            payload.query, top_k=payload.top_k, headers=downstream_headers(root_span))
+        results = client.search(payload.query, top_k=payload.top_k, headers=downstream_headers(root_span))
         context_chunks = [r["text"] for r in results]
 
-        answer = client.generate(
-            payload.query, context_chunks, headers=downstream_headers(root_span))
+        answer = client.generate(payload.query, context_chunks, headers=downstream_headers(root_span))
 
-        sources = [SourceChunk(id=r["id"], text=r["text"],
-                               score=r["score"]) for r in results]
-        root_span.update(
-            output={"answer": answer, "num_sources": len(sources)})
+        sources = [SourceChunk(id=r["id"], text=r["text"], score=r["score"]) for r in results]
+        root_span.update(output={"answer": answer, "num_sources": len(sources)})
 
     try:
         trace_url = lf.get_trace_url(trace_id=trace_id)
@@ -102,12 +98,10 @@ def query_stream(payload: QueryRequest, http_request: Request) -> StreamingRespo
     )
     headers = downstream_headers(root_span)
 
-    results = client.search(
-        payload.query, top_k=payload.top_k, headers=headers)
+    results = client.search(payload.query, top_k=payload.top_k, headers=headers)
     context_chunks = [r["text"] for r in results]
 
-    sources = [{"id": r["id"], "text": r["text"], "score": r["score"]}
-               for r in results]
+    sources = [{"id": r["id"], "text": r["text"], "score": r["score"]} for r in results]
 
     def event_stream():
         full_answer_parts = []

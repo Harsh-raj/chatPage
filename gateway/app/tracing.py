@@ -16,6 +16,7 @@ Langfuse(...) construction needed here. If those env vars aren't set, the
 client no-ops (tracing calls become harmless no-ops rather than errors),
 so this is safe to leave in place even before Langfuse is configured.
 """
+
 from __future__ import annotations
 
 from typing import Mapping, Optional

@@ -1,5 +1,7 @@
-from chunking import chunk_text
 import sys
+
+from chunking import chunk_text
+
 sys.path.insert(0, "..")
 
 
@@ -22,5 +24,6 @@ def test_long_text_splits_into_multiple_overlapping_chunks():
 
 def test_rejects_invalid_overlap():
     import pytest
+
     with pytest.raises(ValueError):
         chunk_text("some text", chunk_size=100, overlap=100)

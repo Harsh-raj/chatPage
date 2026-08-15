@@ -3,6 +3,7 @@ from collections import Counter
 
 from fastapi import FastAPI, HTTPException, Request
 
+from app.auth import ApiKeyMiddleware
 from app.embeddings import DeterministicHashEmbedder, Embedder, RealEmbedder
 from app.fusion import reciprocal_rank_fusion
 from app.keyword_index import BM25KeywordIndex
@@ -18,7 +19,6 @@ from app.schema import (
     SearchResult,
 )
 from app.tracing import langfuse, trace_context_from_headers
-from app.auth import ApiKeyMiddleware
 from app.vector_store import InMemoryVectorStore, QdrantVectorStore, VectorStore
 
 app = FastAPI(title="retrieval-service")
@@ -30,8 +30,7 @@ else:
     embedder = DeterministicHashEmbedder(dim=64)
 
 if os.environ.get("USE_REAL_STORE") == "1":
-    store: VectorStore = QdrantVectorStore(
-        vector_size=embedder.dim if hasattr(embedder, "dim") else 64)
+    store: VectorStore = QdrantVectorStore(vector_size=embedder.dim if hasattr(embedder, "dim") else 64)
 else:
     store = InMemoryVectorStore()
 
@@ -70,8 +69,7 @@ def index_documents(request: IndexRequest, http_request: Request) -> dict:
     ) as span:
         ids = [doc.id for doc in request.documents]
         texts = [doc.text for doc in request.documents]
-        payloads = [{"text": doc.text, "metadata": doc.metadata}
-                    for doc in request.documents]
+        payloads = [{"text": doc.text, "metadata": doc.metadata} for doc in request.documents]
 
         vectors = embedder.embed(texts)
         store.add(ids, vectors, payloads)
@@ -88,11 +86,9 @@ def list_documents() -> ListDocumentsResponse:
     """Lists every distinct source document currently indexed, with a chunk
     count each -- use this to see what's there before deleting anything."""
     items = store.list_all()
-    source_counts = Counter(item["metadata"].get(
-        "source", "(unknown)") for item in items)
+    source_counts = Counter(item["metadata"].get("source", "(unknown)") for item in items)
 
-    documents = [DocumentSummary(source=source, chunk_count=count)
-                 for source, count in sorted(source_counts.items())]
+    documents = [DocumentSummary(source=source, chunk_count=count) for source, count in sorted(source_counts.items())]
     return ListDocumentsResponse(documents=documents, total_chunks=len(items))
 
 
@@ -106,12 +102,10 @@ def delete_by_source(source: str) -> DeleteResponse:
     removes all of them in one call.
     """
     items = store.list_all()
-    matching_ids = [item["id"]
-                    for item in items if item["metadata"].get("source") == source]
+    matching_ids = [item["id"] for item in items if item["metadata"].get("source") == source]
 
     if not matching_ids:
-        raise HTTPException(
-            status_code=404, detail=f"No documents found with source='{source}'")
+        raise HTTPException(status_code=404, detail=f"No documents found with source='{source}'")
 
     removed_from_store = store.delete(matching_ids)
     keyword_index.delete(matching_ids)
@@ -156,8 +150,7 @@ def search(request: SearchRequest, http_request: Request) -> SearchResponse:
     ) as span:
         query_vector = embedder.embed([request.query])[0]
         dense_results = store.search(query_vector, top_k=CANDIDATE_POOL_SIZE)
-        keyword_results = keyword_index.search(
-            request.query, top_k=CANDIDATE_POOL_SIZE)
+        keyword_results = keyword_index.search(request.query, top_k=CANDIDATE_POOL_SIZE)
 
         fused = reciprocal_rank_fusion([dense_results, keyword_results])
 
@@ -165,8 +158,7 @@ def search(request: SearchRequest, http_request: Request) -> SearchResponse:
             request.query,
             fused,
             top_k=request.top_k,
-            threshold=RERANK_THRESHOLD if isinstance(
-                reranker, CrossEncoderReranker) else None,
+            threshold=RERANK_THRESHOLD if isinstance(reranker, CrossEncoderReranker) else None,
         )
 
         results = [

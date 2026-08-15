@@ -16,7 +16,9 @@ Note: this index lives in-process and is rebuilt from scratch on service
 restart. If you're using the persistent QdrantVectorStore, indexed vectors
 survive restarts but this keyword index does not.
 """
+
 from __future__ import annotations
+
 from rank_bm25 import BM25Okapi
 
 
@@ -46,8 +48,7 @@ class BM25KeywordIndex(KeywordIndex):
         self._bm25: BM25Okapi | None = None
 
     def _rebuild(self) -> None:
-        self._bm25 = BM25Okapi(
-            self._tokenized_corpus) if self._tokenized_corpus else None
+        self._bm25 = BM25Okapi(self._tokenized_corpus) if self._tokenized_corpus else None
 
     def add(self, ids: list[str], texts: list[str], payloads: list[dict] | None = None) -> None:
         self._ids.extend(ids)
@@ -65,16 +66,11 @@ class BM25KeywordIndex(KeywordIndex):
         scores = self._bm25.get_scores(_tokenize(query))
         top_k = min(top_k, len(self._ids))
         top_idx = sorted(range(len(scores)), key=lambda i: -scores[i])[:top_k]
-        return [
-            {"id": self._ids[i], "score": float(
-                scores[i]), **self._payloads[i]}
-            for i in top_idx
-        ]
+        return [{"id": self._ids[i], "score": float(scores[i]), **self._payloads[i]} for i in top_idx]
 
     def delete(self, ids: list[str]) -> int:
         ids_to_remove = set(ids)
-        keep_idx = [i for i, doc_id in enumerate(
-            self._ids) if doc_id not in ids_to_remove]
+        keep_idx = [i for i, doc_id in enumerate(self._ids) if doc_id not in ids_to_remove]
         removed = len(self._ids) - len(keep_idx)
 
         self._ids = [self._ids[i] for i in keep_idx]

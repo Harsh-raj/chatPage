@@ -1,6 +1,7 @@
-from fastapi.testclient import TestClient
 from unittest.mock import patch
+
 from app.main import app
+from fastapi.testclient import TestClient
 
 client = TestClient(app)
 
@@ -14,14 +15,11 @@ def test_health_check():
 @patch("app.client.search")
 def test_query_orchestrates_retrieval_then_generation(mock_search, mock_generate):
     # Arrange: pretend retrieval and generation services responded
-    mock_search.return_value = [
-        {"id": "doc1", "text": "Paris is the capital of France.", "score": 0.95}
-    ]
+    mock_search.return_value = [{"id": "doc1", "text": "Paris is the capital of France.", "score": 0.95}]
     mock_generate.return_value = "The capital of France is Paris."
 
     # Act
-    response = client.post(
-        "/query", json={"query": "What is the capital of France?"})
+    response = client.post("/query", json={"query": "What is the capital of France?"})
 
     # Assert
     assert response.status_code == 200

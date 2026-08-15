@@ -2,6 +2,7 @@
 Chunking logic, kept as a standalone, testable function -- deliberately
 independent of any HTTP/PDF code so it can be unit tested in isolation.
 """
+
 from __future__ import annotations
 
 

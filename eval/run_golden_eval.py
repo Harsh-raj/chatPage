@@ -21,9 +21,11 @@ support depends on.
 Usage:
     python run_golden_eval.py --retrieval-url http://localhost:8001
 """
+
 import argparse
 import json
 import os
+
 import requests
 
 
@@ -77,20 +79,17 @@ def run_single_question(retrieval_url: str, question: dict, top_k: int = 3) -> d
 
     expected_keywords = question.get("expected_keywords", [])
     combined_text = " ".join(r["text"] for r in results).lower()
-    missing_keywords = [
-        kw for kw in expected_keywords if kw.lower() not in combined_text]
+    missing_keywords = [kw for kw in expected_keywords if kw.lower() not in combined_text]
     if missing_keywords:
         result["passed"] = False
-        result["reasons"].append(
-            f"Missing expected keyword(s) in retrieved text: {missing_keywords}")
+        result["reasons"].append(f"Missing expected keyword(s) in retrieved text: {missing_keywords}")
 
     return result
 
 
 def main():
     parser = argparse.ArgumentParser()
-    parser.add_argument(
-        "--golden-set", default=os.path.join(os.path.dirname(__file__), "golden_questions.json"))
+    parser.add_argument("--golden-set", default=os.path.join(os.path.dirname(__file__), "golden_questions.json"))
     parser.add_argument("--retrieval-url", default="http://localhost:8001")
     parser.add_argument("--top-k", type=int, default=3)
     args = parser.parse_args()
@@ -100,8 +99,7 @@ def main():
 
     for q in questions:
         try:
-            result = run_single_question(
-                args.retrieval_url, q, top_k=args.top_k)
+            result = run_single_question(args.retrieval_url, q, top_k=args.top_k)
         except requests.exceptions.RequestException as e:
             result = {
                 "id": q["id"],

@@ -35,8 +35,7 @@ def build_rag_prompt_with_flags(query: str, context_chunks: list[str]) -> tuple[
     if not sanitized_chunks:
         context_block = "No relevant context was found."
     else:
-        context_block = "\n\n".join(
-            f"[{i + 1}] {chunk}" for i, chunk in enumerate(sanitized_chunks))
+        context_block = "\n\n".join(f"[{i + 1}] {chunk}" for i, chunk in enumerate(sanitized_chunks))
 
     prompt = (
         "You are a helpful assistant that answers questions using ONLY the "

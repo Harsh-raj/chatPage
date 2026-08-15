@@ -1,13 +1,17 @@
 import os
-import time
 import sys
+import time
 from pathlib import Path
+
 import streamlit as st
 
 sys.path.insert(0, str(Path(__file__).resolve().parent.parent))
 
 from app.logic import (
-    check_backend_ready, render_sources, stream_query, ingest_pdf_with_progress,
+    check_backend_ready,
+    ingest_pdf_with_progress,
+    render_sources,
+    stream_query,
 )
 
 GATEWAY_URL = os.environ.get("GATEWAY_URL", "http://localhost:8000")
@@ -22,24 +26,32 @@ with st.sidebar:
 
     with st.expander("Ingestion options"):
         with_summaries = st.checkbox(
-            "Generate page + document summaries", value=True,
+            "Generate page + document summaries",
+            value=True,
             help="Calls the LLM once per page plus once for the whole document -- "
-                 "the slowest part of ingestion, but improves answers to broad "
-                 "'what is this document about' questions.",
+            "the slowest part of ingestion, but improves answers to broad "
+            "'what is this document about' questions.",
         )
         with_tables = st.checkbox("Extract tables", value=True)
         with_ocr = st.checkbox(
-            "OCR scanned pages and images", value=True,
+            "OCR scanned pages and images",
+            value=True,
             help="Needed for scanned PDFs with no real text layer, and for text "
-                 "embedded in diagrams/figures. Skip this for speed if your PDF "
-                 "is already text-based.",
+            "embedded in diagrams/figures. Skip this for speed if your PDF "
+            "is already text-based.",
         )
         chunk_size = st.number_input("Chunk size (characters)", min_value=100, max_value=4000, value=800, step=100)
         overlap = st.number_input("Chunk overlap (characters)", min_value=0, max_value=2000, value=100, step=50)
 
     if st.button("Ingest document", disabled=uploaded_file is None, use_container_width=True):
         ingest_pdf_with_progress(
-            INGESTION_URL, uploaded_file, chunk_size, overlap, with_summaries, with_tables, with_ocr,
+            INGESTION_URL,
+            uploaded_file,
+            chunk_size,
+            overlap,
+            with_summaries,
+            with_tables,
+            with_ocr,
         )
 
 
@@ -77,8 +89,7 @@ if not st.session_state.backend_ready:
             if health and "services" in health:
                 for name, info in health["services"].items():
                     icon = "done" if info.get("ready") else "waiting"
-                    st.write(
-                        f"[{icon}] {name}: {'ready' if info.get('ready') else 'starting...'}")
+                    st.write(f"[{icon}] {name}: {'ready' if info.get('ready') else 'starting...'}")
             else:
                 st.write("Waiting for gateway to respond...")
 
@@ -112,15 +123,16 @@ if prompt := st.chat_input("Provide your query here!"):
     with st.chat_message("assistant"):
         sources: list = []
         error_holder = {"backend_down": False}
-        full_response = st.write_stream(
-            stream_query(GATEWAY_URL, prompt, sources, error_holder))
+        full_response = st.write_stream(stream_query(GATEWAY_URL, prompt, sources, error_holder))
         render_sources(sources)
 
-    st.session_state.messages.append({
-        "role": "assistant",
-        "content": full_response,
-        "sources": sources,
-    })
+    st.session_state.messages.append(
+        {
+            "role": "assistant",
+            "content": full_response,
+            "sources": sources,
+        }
+    )
 
     # If the backend turned out to be unreachable mid-conversation, drop the
     # stale "ready" flag so the readiness gate re-appears and genuinely

@@ -41,8 +41,7 @@ class NoOpReranker(Reranker):
     ) -> list[dict]:
         results = candidates[:top_k]
         if threshold is not None:
-            results = [c for c in results if c.get(
-                "score", c.get("rrf_score", 0)) >= threshold]
+            results = [c for c in results if c.get("score", c.get("rrf_score", 0)) >= threshold]
         return results
 
 
@@ -73,8 +72,7 @@ class CrossEncoderReranker(Reranker):
         raw_scores = self.model.predict(pairs)
         # Normalize raw logit scores to 0-1 via sigmoid, so a threshold like
         # 0.5 has a consistent, interpretable meaning regardless of model.
-        scored = [{**c, "rerank_score": 1 / (1 + math.exp(-s))}
-                  for c, s in zip(candidates, raw_scores, strict=True)]
+        scored = [{**c, "rerank_score": 1 / (1 + math.exp(-s))} for c, s in zip(candidates, raw_scores, strict=True)]
         scored.sort(key=lambda x: -x["rerank_score"])
 
         if threshold is not None:

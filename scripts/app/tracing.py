@@ -13,6 +13,7 @@ from the environment and returns a process-wide singleton. If unset, the
 client no-ops rather than erroring, so this is safe even before Langfuse is
 configured.
 """
+
 from __future__ import annotations
 
 from typing import Mapping, Optional

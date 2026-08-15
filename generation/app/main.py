@@ -25,8 +25,7 @@ def health():
 
 @app.post("/generate", response_model=GenerateResponse)
 def generate(request: GenerateRequest, http_request: Request) -> GenerateResponse:
-    prompt, injection_flags = build_rag_prompt_with_flags(
-        request.query, request.context_chunks)
+    prompt, injection_flags = build_rag_prompt_with_flags(request.query, request.context_chunks)
 
     lf = langfuse()
     trace_context = trace_context_from_headers(http_request.headers)
@@ -50,8 +49,7 @@ def generate(request: GenerateRequest, http_request: Request) -> GenerateRespons
         answer = llm_client.generate(prompt)
         span.update(output=answer)
         if injection_flags:
-            span.update(
-                level="WARNING", status_message=f"{len(injection_flags)} context chunk(s) flagged and redacted")
+            span.update(level="WARNING", status_message=f"{len(injection_flags)} context chunk(s) flagged and redacted")
 
     return GenerateResponse(answer=answer, prompt_char_length=len(prompt), injection_flags=injection_flags)
 
@@ -59,8 +57,7 @@ def generate(request: GenerateRequest, http_request: Request) -> GenerateRespons
 @app.post("/generate/stream")
 def generate_stream(request: GenerateRequest, http_request: Request) -> StreamingResponse:
     """Streams the answer as plain text chunks as they're generated."""
-    prompt, injection_flags = build_rag_prompt_with_flags(
-        request.query, request.context_chunks)
+    prompt, injection_flags = build_rag_prompt_with_flags(request.query, request.context_chunks)
 
     lf = langfuse()
     trace_context = trace_context_from_headers(http_request.headers)
@@ -85,8 +82,7 @@ def generate_stream(request: GenerateRequest, http_request: Request) -> Streamin
         },
     )
     if injection_flags:
-        span.update(
-            level="WARNING", status_message=f"{len(injection_flags)} context chunk(s) flagged and redacted")
+        span.update(level="WARNING", status_message=f"{len(injection_flags)} context chunk(s) flagged and redacted")
 
     def token_stream():
         parts = []

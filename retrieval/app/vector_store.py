@@ -74,8 +74,7 @@ class InMemoryVectorStore(VectorStore):
 
     def delete(self, ids: list[str]) -> int:
         ids_to_remove = set(ids)
-        keep_idx = [i for i, doc_id in enumerate(
-            self._ids) if doc_id not in ids_to_remove]
+        keep_idx = [i for i, doc_id in enumerate(self._ids) if doc_id not in ids_to_remove]
         removed = len(self._ids) - len(keep_idx)
 
         self._ids = [self._ids[i] for i in keep_idx]
@@ -116,8 +115,7 @@ class QdrantVectorStore(VectorStore):
         if self.collection_name not in existing:
             self.client.create_collection(
                 collection_name=self.collection_name,
-                vectors_config=VectorParams(
-                    size=vector_size, distance=Distance.COSINE),
+                vectors_config=VectorParams(size=vector_size, distance=Distance.COSINE),
             )
 
     def add(self, ids: list[str], vectors: np.ndarray, payloads: list[dict]) -> None:
@@ -135,8 +133,7 @@ class QdrantVectorStore(VectorStore):
         self.client.upsert(collection_name=self.collection_name, points=points)
 
     def search(self, query_vector: np.ndarray, top_k: int = 5) -> list[dict]:
-        query_vector_list = np.asarray(
-            query_vector, dtype=float).flatten().tolist()
+        query_vector_list = np.asarray(query_vector, dtype=float).flatten().tolist()
         response = self.client.query_points(
             collection_name=self.collection_name,
             query=query_vector_list,
@@ -146,15 +143,13 @@ class QdrantVectorStore(VectorStore):
         for hit in response.points:
             payload = dict(hit.payload or {})
             original_id = payload.pop("_original_id", str(hit.id))
-            results.append(
-                {"id": original_id, "score": float(hit.score), **payload})
+            results.append({"id": original_id, "score": float(hit.score), **payload})
         return results
 
     def delete(self, ids: list[str]) -> int:
         from qdrant_client.models import PointIdsList
 
-        qdrant_ids: list[int | str | uuid.UUID] = [
-            _to_qdrant_id(i) for i in ids]
+        qdrant_ids: list[int | str | uuid.UUID] = [_to_qdrant_id(i) for i in ids]
         self.client.delete(
             collection_name=self.collection_name,
             points_selector=PointIdsList(points=qdrant_ids),
@@ -175,8 +170,7 @@ class QdrantVectorStore(VectorStore):
             for point in points:
                 payload = dict(point.payload or {})
                 original_id = payload.pop("_original_id", str(point.id))
-                results.append(
-                    {"id": original_id, "metadata": payload.get("metadata", {})})
+                results.append({"id": original_id, "metadata": payload.get("metadata", {})})
             if next_offset is None:
                 break
         return results

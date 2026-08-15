@@ -70,8 +70,7 @@ def open_pdf(pdf_path: str) -> fitz.Document:
     try:
         doc = fitz.open(pdf_path)
     except Exception as e:
-        raise PdfIngestionError(
-            f"Could not open '{pdf_path}' as a PDF: {e}") from e
+        raise PdfIngestionError(f"Could not open '{pdf_path}' as a PDF: {e}") from e
 
     if doc.is_encrypted and not doc.authenticate(""):
         raise PdfIngestionError(
@@ -87,14 +86,12 @@ def _ocr_image(image: "Image.Image", context: str, warnings: list[str]) -> str:
     failure). Failures are recorded as warnings, never raised, so a missing
     Tesseract install or an unreadable image doesn't abort ingestion."""
     if not _OCR_AVAILABLE:
-        warnings.append(
-            f"{context}: OCR skipped (pytesseract/Pillow not installed).")
+        warnings.append(f"{context}: OCR skipped (pytesseract/Pillow not installed).")
         return ""
     try:
         return _clean_text(pytesseract.image_to_string(image))
     except Exception as e:
-        warnings.append(
-            f"{context}: OCR failed ({e}). Is the Tesseract binary installed?")
+        warnings.append(f"{context}: OCR failed ({e}). Is the Tesseract binary installed?")
         return ""
 
 
@@ -102,8 +99,7 @@ def table_to_markdown(rows: list[list[str | None]]) -> str:
     """Converts extracted table rows into a markdown table string."""
     if not rows:
         return ""
-    cleaned_rows = [[(_clean_text(cell) if cell else "")
-                     for cell in row] for row in rows]
+    cleaned_rows = [[(_clean_text(cell) if cell else "") for cell in row] for row in rows]
     header, *body_rows = cleaned_rows
     lines = [
         "| " + " | ".join(header) + " |",
@@ -139,8 +135,7 @@ def extract_page_content(
     try:
         raw_text = page.get_text() or ""
     except Exception as e:
-        warnings.append(
-            f"Page {page_num}: failed to extract text ({e}). Skipped.")
+        warnings.append(f"Page {page_num}: failed to extract text ({e}). Skipped.")
         raw_text = ""
     result["text"] = _clean_text(raw_text)
 
@@ -149,8 +144,7 @@ def extract_page_content(
     if not result["text"]:
         try:
             pix = page.get_pixmap(dpi=200)
-            img = Image.open(io.BytesIO(pix.tobytes("png"))
-                             ) if _OCR_AVAILABLE else None
+            img = Image.open(io.BytesIO(pix.tobytes("png"))) if _OCR_AVAILABLE else None
             if img is not None:
                 ocr_text = _ocr_image(img, f"Page {page_num}", warnings)
                 if ocr_text:
@@ -161,8 +155,7 @@ def extract_page_content(
                         f"(page may be blank, or OCR unavailable)."
                     )
             else:
-                warnings.append(
-                    f"Page {page_num}: no extractable text (OCR unavailable to attempt recovery).")
+                warnings.append(f"Page {page_num}: no extractable text (OCR unavailable to attempt recovery).")
         except Exception as e:
             warnings.append(f"Page {page_num}: OCR fallback failed ({e}).")
 
@@ -176,8 +169,7 @@ def extract_page_content(
                 if md:
                     result["tables"].append(md)
             except Exception as e:
-                warnings.append(
-                    f"Page {page_num}: a table was found but failed to extract ({e}).")
+                warnings.append(f"Page {page_num}: a table was found but failed to extract ({e}).")
     except Exception as e:
         warnings.append(f"Page {page_num}: table detection failed ({e}).")
 
@@ -190,14 +182,12 @@ def extract_page_content(
                 try:
                     base_image = doc.extract_image(xref)
                     img = Image.open(io.BytesIO(base_image["image"]))
-                    ocr_text = _ocr_image(
-                        img, f"Page {page_num}, image {img_idx + 1}", warnings)
+                    ocr_text = _ocr_image(img, f"Page {page_num}, image {img_idx + 1}", warnings)
                     # Only keep OCR results that look like real text, not noise
                     if ocr_text and len(ocr_text) >= 8:
                         result["image_ocr_texts"].append(ocr_text)
                 except Exception as e:
-                    warnings.append(
-                        f"Page {page_num}, image {img_idx + 1}: could not process ({e}).")
+                    warnings.append(f"Page {page_num}, image {img_idx + 1}: could not process ({e}).")
         except Exception as e:
             warnings.append(f"Page {page_num}: image extraction failed ({e}).")
 
@@ -258,8 +248,7 @@ def iter_build_documents(
 
     for page_idx in range(num_pages):
         page_num = page_idx + 1
-        content = extract_page_content(
-            doc, page_idx, warnings, run_image_ocr=with_ocr)
+        content = extract_page_content(doc, page_idx, warnings, run_image_ocr=with_ocr)
         page_texts.append(content["text"])
 
         # Raw text chunks
@@ -341,8 +330,7 @@ def iter_build_documents(
                 headers=headers,
             )
         except requests.exceptions.RequestException as e:
-            warnings.append(
-                f"Page {page_num}: summarization failed ({e}). Skipped summary for this page.")
+            warnings.append(f"Page {page_num}: summarization failed ({e}). Skipped summary for this page.")
             continue
         page_summaries.append(summary)
         documents.append(
@@ -446,7 +434,7 @@ def iter_index_documents(
         return
     total = len(documents)
     for start in range(0, total, batch_size):
-        batch = documents[start: start + batch_size]
+        batch = documents[start : start + batch_size]
         response = requests.post(
             f"{retrieval_url}/index",
             json={"documents": batch},
@@ -472,8 +460,7 @@ def index_documents(
 
 
 def main():
-    parser = argparse.ArgumentParser(
-        description="Ingest a PDF into the retrieval service")
+    parser = argparse.ArgumentParser(description="Ingest a PDF into the retrieval service")
     parser.add_argument("pdf_path", help="Path to the PDF file")
     parser.add_argument("--retrieval-url", default="http://localhost:8001")
     parser.add_argument("--generation-url", default="http://localhost:8002")
@@ -489,8 +476,7 @@ def main():
     args = parser.parse_args()
 
     if not _OCR_AVAILABLE and not args.no_ocr:
-        print(
-            "Note: pytesseract/Pillow not installed -- OCR will be skipped automatically.")
+        print("Note: pytesseract/Pillow not installed -- OCR will be skipped automatically.")
 
     print(f"Extracting content from {args.pdf_path} ...")
     try:
@@ -508,8 +494,7 @@ def main():
         sys.exit(1)
 
     if warnings:
-        print(
-            f"\n{len(warnings)} issue(s) encountered (ingestion continued anyway):")
+        print(f"\n{len(warnings)} issue(s) encountered (ingestion continued anyway):")
         for w in warnings:
             print(f"  - {w}")
         print()

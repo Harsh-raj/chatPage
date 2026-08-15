@@ -5,6 +5,7 @@ method that combines rankings without needing the two systems' scores to
 be on comparable scales (cosine similarity and BM25 scores aren't
 directly comparable, but their *ranks* can be fairly combined).
 """
+
 from __future__ import annotations
 
 
@@ -32,9 +33,6 @@ def reciprocal_rank_fusion(
             if item_id not in payloads or len(item) > len(payloads[item_id]):
                 payloads[item_id] = item
 
-    fused = [
-        {**payloads[item_id], "id": item_id, "rrf_score": score}
-        for item_id, score in scores.items()
-    ]
+    fused = [{**payloads[item_id], "id": item_id, "rrf_score": score} for item_id, score in scores.items()]
     fused.sort(key=lambda x: -x["rrf_score"])
     return fused

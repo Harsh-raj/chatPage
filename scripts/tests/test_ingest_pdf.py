@@ -13,7 +13,6 @@ from app.ingest_pdf import (
     table_to_markdown,
 )
 
-
 # --- Text cleaning (unchanged behavior) ---
 
 
@@ -22,8 +21,7 @@ def test_clean_text_removes_null_bytes():
 
 
 def test_clean_text_removes_control_characters_but_keeps_newlines():
-    assert _clean_text(
-        "line one\x01\x02\nline two\x7f") == "line one\nline two"
+    assert _clean_text("line one\x01\x02\nline two\x7f") == "line one\nline two"
 
 
 # --- Table to markdown conversion ---
@@ -108,8 +106,7 @@ def test_extract_page_content_extracts_tables():
     fake_table = MagicMock()
     fake_table.extract.return_value = [["A", "B"], ["1", "2"]]
     doc = MagicMock()
-    doc.__getitem__.return_value = _make_fake_page(
-        text="some text", tables=[fake_table])
+    doc.__getitem__.return_value = _make_fake_page(text="some text", tables=[fake_table])
     warnings = []
     content = extract_page_content(doc, 0, warnings)
     assert len(content["tables"]) == 1
@@ -190,8 +187,7 @@ def test_extract_page_content_discards_short_noisy_image_ocr_results():
 
 def test_build_documents_produces_separate_documents_per_level(tmp_path):
     fake_table = MagicMock()
-    fake_table.extract.return_value = [
-        ["Method", "Effect"], ["L1", "Sparsity"]]
+    fake_table.extract.return_value = [["Method", "Effect"], ["L1", "Sparsity"]]
 
     page = _make_fake_page(
         text="Regularization prevents overfitting in models with many parameters and features.",
@@ -285,13 +281,11 @@ def test_build_documents_result_matches_draining_iter_build_documents(tmp_path):
 
 
 def test_iter_index_documents_yields_progress_per_batch():
-    documents = [{"id": f"doc{i}", "text": "x", "metadata": {}}
-                 for i in range(5)]
+    documents = [{"id": f"doc{i}", "text": "x", "metadata": {}} for i in range(5)]
 
     with patch("app.ingest_pdf.requests.post") as mock_post:
         mock_post.return_value.raise_for_status.return_value = None
-        events = list(iter_index_documents(
-            documents, "http://fake:8001", batch_size=2))
+        events = list(iter_index_documents(documents, "http://fake:8001", batch_size=2))
 
     assert [e["indexed"] for e in events] == [2, 4, 5]
     assert all(e["total"] == 5 for e in events)
@@ -357,8 +351,7 @@ def test_iter_build_documents_forwards_headers_to_summarize_calls():
     page/document summary spans nest under the caller's trace instead of
     each becoming a disconnected one (see app/tracing.py in the ingestion
     service)."""
-    page = _make_fake_page(
-        text="Some real content for header propagation check.")
+    page = _make_fake_page(text="Some real content for header propagation check.")
     fake_doc = MagicMock()
     fake_doc.is_encrypted = False
     fake_doc.__len__.return_value = 1
