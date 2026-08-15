@@ -32,8 +32,9 @@ import io
 import os
 import re
 import sys
-import requests
+
 import fitz
+import requests
 
 _SCRIPT_DIR = os.path.dirname(os.path.abspath(__file__))
 if _SCRIPT_DIR not in sys.path:

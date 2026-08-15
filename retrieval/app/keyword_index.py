@@ -17,6 +17,7 @@ restart. If you're using the persistent QdrantVectorStore, indexed vectors
 survive restarts but this keyword index does not.
 """
 from __future__ import annotations
+
 from rank_bm25 import BM25Okapi
 
 

@@ -1,8 +1,7 @@
-from schema import IndexRequest, SearchResponse, SearchRequest
-from fastapi import FastAPI
-
 from embeddings import RealEmbedder
+from fastapi import FastAPI
 from langchain_qdrant.qdrant import QdrantVectorStore
+from schema import IndexRequest, SearchRequest, SearchResponse
 
 embedder = RealEmbedder()
 

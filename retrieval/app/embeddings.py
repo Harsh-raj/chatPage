@@ -1,5 +1,7 @@
 from __future__ import annotations
+
 import hashlib
+
 import numpy as np
 
 

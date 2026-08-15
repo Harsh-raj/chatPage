@@ -7,6 +7,7 @@ Point GATEWAY_URL / RETRIEVAL_URL at wherever the services are actually
 running (defaults assume docker-compose's port mappings).
 """
 import os
+
 import httpx
 import pytest
 

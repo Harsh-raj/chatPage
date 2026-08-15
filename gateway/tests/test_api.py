@@ -20,7 +20,8 @@ def test_query_orchestrates_retrieval_then_generation(mock_search, mock_generate
     mock_generate.return_value = "The capital of France is Paris."
 
     # Act
-    response = client.post("/query", json={"query": "What is the capital of France?"})
+    response = client.post(
+        "/query", json={"query": "What is the capital of France?"})
 
     # Assert
     assert response.status_code == 200
@@ -30,7 +31,8 @@ def test_query_orchestrates_retrieval_then_generation(mock_search, mock_generate
 
     # Assert the gateway called retrieval BEFORE generation, and passed
     # retrieved text as context -- this is the actual orchestration contract.
-    mock_search.assert_called_once_with("What is the capital of France?", top_k=5)
+    mock_search.assert_called_once_with(
+        "What is the capital of France?", top_k=5)
     mock_generate.assert_called_once_with(
         "What is the capital of France?", ["Paris is the capital of France."]
     )

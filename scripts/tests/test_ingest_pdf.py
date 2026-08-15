@@ -1,10 +1,14 @@
-import pytest
-from unittest.mock import patch, MagicMock
-from app.ingest_pdf import (
-    build_documents, open_pdf, _clean_text, table_to_markdown,
-    extract_page_content, PdfIngestionError,
-)
+from unittest.mock import MagicMock, patch
 
+import pytest
+from app.ingest_pdf import (
+    PdfIngestionError,
+    _clean_text,
+    build_documents,
+    extract_page_content,
+    open_pdf,
+    table_to_markdown,
+)
 
 # --- Text cleaning (unchanged behavior) ---
 

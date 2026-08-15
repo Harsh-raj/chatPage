@@ -13,8 +13,10 @@ while preserving the original ID in the payload so search()/list_all() can
 return it unchanged to callers.
 """
 from __future__ import annotations
+
 import os
 import uuid
+
 import numpy as np
 
 

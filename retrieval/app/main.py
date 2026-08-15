@@ -1,16 +1,23 @@
 import os
 from collections import Counter
+
 from fastapi import FastAPI, HTTPException
 
+from app.embeddings import DeterministicHashEmbedder, RealEmbedder
+from app.fusion import reciprocal_rank_fusion
+from app.keyword_index import BM25KeywordIndex
+from app.reranker import CrossEncoderReranker, NoOpReranker
 from app.schema import (
-    IndexRequest, SearchRequest, SearchResponse, SearchResult,
-    DeleteByIdsRequest, DeleteResponse, ListDocumentsResponse, DocumentSummary,
+    DeleteByIdsRequest,
+    DeleteResponse,
+    DocumentSummary,
+    IndexRequest,
+    ListDocumentsResponse,
+    SearchRequest,
+    SearchResponse,
+    SearchResult,
 )
 from app.vector_store import InMemoryVectorStore, QdrantVectorStore
-from app.embeddings import DeterministicHashEmbedder, RealEmbedder
-from app.keyword_index import BM25KeywordIndex
-from app.fusion import reciprocal_rank_fusion
-from app.reranker import NoOpReranker, CrossEncoderReranker
 
 app = FastAPI(title="retrieval-service")
 

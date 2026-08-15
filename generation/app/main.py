@@ -1,10 +1,11 @@
 import os
+
 from fastapi import FastAPI
 from fastapi.responses import StreamingResponse
 
-from app.schema import GenerateRequest, GenerateResponse
+from app.llm_client import OllamaLLMClient, StubLLMClient
 from app.prompt import build_rag_prompt
-from app.llm_client import StubLLMClient, OllamaLLMClient
+from app.schema import GenerateRequest, GenerateResponse
 
 app = FastAPI(title="generation-service")
 
