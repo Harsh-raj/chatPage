@@ -1,79 +1,46 @@
 import os
 import time
-import json
-import requests
+import sys
+from pathlib import Path
 import streamlit as st
 
+sys.path.insert(0, str(Path(__file__).resolve().parent.parent))
+
+from app.logic import (
+    check_backend_ready, render_sources, stream_query, ingest_pdf_with_progress,
+)
+
 GATEWAY_URL = os.environ.get("GATEWAY_URL", "http://localhost:8000")
+INGESTION_URL = os.environ.get("INGESTION_URL", "http://localhost:8003")
 
 st.title("Retrieval Augmented Generation")
 
 
-def check_backend_ready() -> dict | None:
-    """Returns the gateway's aggregated health response, or None if the
-    gateway itself isn't reachable yet."""
-    try:
-        response = requests.get(f"{GATEWAY_URL}/health", timeout=5)
-        response.raise_for_status()
-        return response.json()
-    except requests.exceptions.RequestException:
-        return None
+with st.sidebar:
+    st.header("Add a document")
+    uploaded_file = st.file_uploader("Upload a PDF", type=["pdf"])
 
+    with st.expander("Ingestion options"):
+        with_summaries = st.checkbox(
+            "Generate page + document summaries", value=True,
+            help="Calls the LLM once per page plus once for the whole document -- "
+                 "the slowest part of ingestion, but improves answers to broad "
+                 "'what is this document about' questions.",
+        )
+        with_tables = st.checkbox("Extract tables", value=True)
+        with_ocr = st.checkbox(
+            "OCR scanned pages and images", value=True,
+            help="Needed for scanned PDFs with no real text layer, and for text "
+                 "embedded in diagrams/figures. Skip this for speed if your PDF "
+                 "is already text-based.",
+        )
+        chunk_size = st.number_input("Chunk size (characters)", min_value=100, max_value=4000, value=800, step=100)
+        overlap = st.number_input("Chunk overlap (characters)", min_value=0, max_value=2000, value=100, step=50)
 
-def render_sources(sources: list[dict]) -> None:
-    if not sources:
-        return
-    cols = st.columns(len(sources))
-    for i, (col, src) in enumerate(zip(cols, sources), start=1):
-        with col:
-            with st.popover(f"📄 {i}", use_container_width=True):
-                st.markdown(f"**`{src['id']}`**")
-                st.caption(f"score: {src['score']:.3f}")
-                st.write(src["text"])
-
-
-def stream_query(query_text: str, sources_holder: list, error_holder: dict):
-    """
-    Streams tokens from the gateway. If the backend turns out to be
-    unreachable or unready mid-conversation (e.g. a container restarted
-    after this session already passed the initial readiness gate),
-    error_holder["backend_down"] is set to True so the caller can reset
-    the readiness gate rather than leaving a stale "ready" flag that
-    would keep producing failed queries indefinitely.
-    """
-    try:
-        with requests.post(
-            f"{GATEWAY_URL}/query/stream",
-            json={"query": query_text, "top_k": 5},
-            stream=True,
-            timeout=150,
-        ) as response:
-            response.raise_for_status()
-            for line in response.iter_lines(decode_unicode=True):
-                if not line:
-                    continue
-                event = json.loads(line)
-                if event["type"] == "sources":
-                    sources_holder.extend(event["sources"])
-                elif event["type"] == "token":
-                    yield event["text"]
-                elif event["type"] == "done":
-                    return
-    except requests.exceptions.ConnectionError:
-        error_holder["backend_down"] = True
-        yield "Could not connect to the gateway service. Re-checking backend readiness..."
-    except requests.exceptions.HTTPError as e:
-        status = e.response.status_code if e.response is not None else None
-        if status and status >= 500:
-            # A 5xx from the gateway usually means one of its downstream
-            # services (retrieval/generation) isn't actually ready, even
-            # though this session previously passed the readiness gate.
-            error_holder["backend_down"] = True
-            yield f"A backend service isn't ready yet (error {status}). Re-checking backend readiness..."
-        else:
-            yield f"Gateway returned an error: {e}"
-    except requests.exceptions.ReadTimeout:
-        yield "The model is taking longer than expected to respond. This can happen on the first request after Ollama has been idle. Please try again."
+    if st.button("Ingest document", disabled=uploaded_file is None, use_container_width=True):
+        ingest_pdf_with_progress(
+            INGESTION_URL, uploaded_file, chunk_size, overlap, with_summaries, with_tables, with_ocr,
+        )
 
 
 # --- Readiness gate: block the chat UI until every backend service is up ---
@@ -85,12 +52,15 @@ if not st.session_state.backend_ready:
     # Retrieval loads TWO models on startup (the embedder and, if enabled,
     # the reranker) -- on CPU-only hardware this has been observed to take
     # 3+ minutes on its own, so the wait budget needs real headroom above that.
-    max_wait_seconds = 360
-    poll_interval = 3
+    # Overridable so tests can shrink the wait/poll loop to run near-instantly
+    # instead of the real multi-minute budget -- defaults are unchanged for
+    # normal (non-test) runs.
+    max_wait_seconds = int(os.environ.get("FRONTEND_READY_MAX_WAIT_SECONDS", "360"))
+    poll_interval = int(os.environ.get("FRONTEND_READY_POLL_INTERVAL_SECONDS", "3"))
     waited = 0
 
     while waited < max_wait_seconds:
-        health = check_backend_ready()
+        health = check_backend_ready(GATEWAY_URL)
 
         if health and health.get("status") == "ok":
             st.session_state.backend_ready = True
@@ -143,7 +113,7 @@ if prompt := st.chat_input("Provide your query here!"):
         sources: list = []
         error_holder = {"backend_down": False}
         full_response = st.write_stream(
-            stream_query(prompt, sources, error_holder))
+            stream_query(GATEWAY_URL, prompt, sources, error_holder))
         render_sources(sources)
 
     st.session_state.messages.append({
