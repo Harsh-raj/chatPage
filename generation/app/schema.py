@@ -9,3 +9,4 @@ class GenerateRequest(BaseModel):
 class GenerateResponse(BaseModel):
     answer: str
     prompt_char_length: int
+    injection_flags: list[dict] = []

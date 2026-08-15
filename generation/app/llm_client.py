@@ -47,7 +47,8 @@ class OllamaLLMClient(LLMClient):
         max_retries: int = 3,
         retry_delay_seconds: float = 2.0,
     ):
-        self.base_url = base_url or os.environ.get("OLLAMA_BASE_URL", "http://ollama:11434")
+        self.base_url = base_url or os.environ.get(
+            "OLLAMA_BASE_URL", "http://ollama:11434")
         self.model = model
         self.max_retries = max_retries
         self.retry_delay_seconds = retry_delay_seconds
@@ -58,7 +59,8 @@ class OllamaLLMClient(LLMClient):
             try:
                 response = httpx.post(
                     f"{self.base_url}/api/generate",
-                    json={"model": self.model, "prompt": prompt, "stream": False},
+                    json={"model": self.model,
+                          "prompt": prompt, "stream": False},
                     timeout=120.0,
                 )
                 response.raise_for_status()
