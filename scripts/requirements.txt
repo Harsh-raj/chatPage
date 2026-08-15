@@ -2,3 +2,7 @@ pymupdf
 pytesseract
 pillow
 requests
+fastapi
+uvicorn
+python-multipart
+langfuse
