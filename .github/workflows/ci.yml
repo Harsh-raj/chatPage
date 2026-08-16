@@ -30,7 +30,7 @@ jobs:
     runs-on: ubuntu-latest
     strategy:
       matrix:
-        component: [gateway, retrieval, generation, scripts]
+        component: [gateway, retrieval, generation, scripts, frontend]
     steps:
       - uses: actions/checkout@v4
 

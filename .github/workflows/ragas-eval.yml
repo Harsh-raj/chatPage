@@ -18,8 +18,8 @@ jobs:
       USE_REAL_EMBEDDER: "1"
       USE_REAL_STORE: "1"
       USE_REAL_LLM: "1"
-      ANTHROPIC_API_KEY: ${{ secrets.ANTROPIC_API_KEY }}
-      RAGAS_JUDGE_MODEL: ${{ inputs.judge_model }}
+      ANTHROPIC_API_KEY: ${{ secrets.ANTHROPIC_API_KEY }}
+      RAGAS_JUDGE_MODEL: ${{ inputs.judge_models }}
       LANGFUSE_PUBLIC_KEY: ${{ secrets.LANGFUSE_PUBLIC_KEY }}
       LANGFUSE_SECRET_KEY: ${{ secrets.LANGFUSE_SECRET_KEY }}
       LANGFUSE_HOST: ${{ vars.LANGFUSE_HOST }}
